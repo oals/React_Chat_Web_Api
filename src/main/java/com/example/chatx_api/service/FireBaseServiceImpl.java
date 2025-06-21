@@ -37,7 +37,6 @@ public class FireBaseServiceImpl implements FireBaseService{
             return ResponseEntity.status(HttpStatus.OK).build();
 
         } catch (FirebaseAuthException firebaseAuthException) {
-            firebaseAuthException.getAuthErrorCode();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }

@@ -1,13 +1,13 @@
 package com.example.chatx_api.restController;
 
+import com.example.chatx_api.resolver.AuthenticatedMemberId;
 import com.example.chatx_api.service.CookieService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,12 +15,17 @@ public class CookieController {
 
     private final CookieService cookieService;
 
-    @PostMapping("/api/clear-cookie")
+    @DeleteMapping("/api/cookie/clear")
     public ResponseEntity<?> clearCookie(HttpServletResponse response) {
        return cookieService.clearCookie(response);
     }
 
-
-
+    @GetMapping("/api/cookie/getMemberId")
+    public ResponseEntity<String> getMemberIdFromCookie(@AuthenticatedMemberId String memberId) {
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("쿠키 없음 or 로그인 안됨");
+        }
+        return ResponseEntity.ok(memberId);
+    }
 
 }

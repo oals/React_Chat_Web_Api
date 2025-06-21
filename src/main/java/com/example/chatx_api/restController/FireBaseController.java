@@ -16,7 +16,7 @@ public class FireBaseController {
 
     private final FireBaseService fireBaseService;
 
-    @PostMapping("/api/auth/fireBaseAuthing")
+    @PostMapping("/api/auth/fireBase")
     public ResponseEntity<Void> fireBaseAuthing(HttpServletResponse response, @RequestHeader("Authorization") String token) {
 
         String idToken = token.replace("Bearer ", "");
