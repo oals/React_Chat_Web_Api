@@ -18,7 +18,6 @@ public class FireBaseController {
 
     @PostMapping("/api/auth/fireBase")
     public ResponseEntity<Void> fireBaseAuthing(HttpServletResponse response, @RequestHeader("Authorization") String token) {
-
         String idToken = token.replace("Bearer ", "");
         return fireBaseService.verifyFbToken(response,idToken);
     }

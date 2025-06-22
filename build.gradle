@@ -20,6 +20,7 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 }
 
@@ -34,8 +35,12 @@ dependencies {
 
 	implementation 'com.google.firebase:firebase-admin:9.1.1'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-	implementation 'org.springframework.kafka:spring-kafka'
 
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.webjars:sockjs-client:1.5.1'
+	implementation 'org.webjars:stomp-websocket:2.3.4'
+
+	implementation 'com.example:auth_common:0.0.6-SNAPSHOT'
 }
 
 tasks.named('test') {

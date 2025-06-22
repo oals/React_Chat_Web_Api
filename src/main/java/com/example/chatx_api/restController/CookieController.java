@@ -1,8 +1,7 @@
 package com.example.chatx_api.restController;
 
-import com.example.chatx_api.resolver.AuthenticatedMemberId;
+import com.example.auth_common.resolver.AuthenticatedMemberId;
 import com.example.chatx_api.service.CookieService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
