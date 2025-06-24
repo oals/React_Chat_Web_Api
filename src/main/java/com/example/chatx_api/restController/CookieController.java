@@ -21,9 +21,6 @@ public class CookieController {
 
     @GetMapping("/api/cookie/getMemberId")
     public ResponseEntity<String> getMemberIdFromCookie(@AuthenticatedMemberId String memberId) {
-        if (memberId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("쿠키 없음 or 로그인 안됨");
-        }
         return ResponseEntity.ok(memberId);
     }
 

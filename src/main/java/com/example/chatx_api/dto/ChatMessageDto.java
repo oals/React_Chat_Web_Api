@@ -7,12 +7,11 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatDto {
+public class ChatMessageDto {
 
     private Long chatRoomId;
 
-    private Long senderId;
+    private Long memberId;
 
     private String chatMessage;
-
 }

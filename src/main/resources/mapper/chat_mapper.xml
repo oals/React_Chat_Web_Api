@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.chatx_api.dao.ChatDao">
+
+    <insert id="insertChatArchive" parameterType="com.example.chatx_api.dto.ChatArchiveDto">
+
+        INSERT INTO chat_archive (
+            chat_archive_title,
+            chat_archive_date,
+            chat_archive_json,
+            is_chat_archive_bookmarks,
+            member_id
+        ) VALUES (
+            #{chatArchiveTitle},
+            NOW(),
+            #{chatArchiveJson},
+            #{isChatArchiveBookmarks},
+            #{memberId}
+        )
+    </insert>
+
+    <select id="selectChatArchive" parameterType="com.example.chatx_api.dto.ChatArchiveDto" resultType="com.example.chatx_api.dto.ChatArchiveDto">
+
+        SELECT
+            ca.chat_archive_id AS chatArchiveId,
+            ca.chat_archive_title AS chatArchiveTitle,
+            ca.chat_archive_date AS chatArchiveDate,
+            ca.is_chat_archive_bookmarks AS isChatArchiveBookmarks
+        FROM
+            chat_archive ca
+        WHERE
+            ca.member_id = #{memberId}
+
+        <if test="isChatArchiveBookmarks == true">
+            AND ca.is_chat_archive_bookmarks = true
+        </if>
+
+        ORDER BY
+            ca.chat_archive_id DESC
+        LIMIT #{size} OFFSET #{offset};
+
+    </select>
+
+
+    <select id="selectChatArchiveTotalCount" parameterType="com.example.chatx_api.dto.ChatArchiveDto" resultType="int">
+
+        SELECT
+            count(*)
+        FROM
+            chat_archive ca
+        WHERE
+            ca.member_id = #{memberId}
+
+        <if test="isChatArchiveBookmarks == true">
+            AND ca.is_chat_archive_bookmarks = true
+        </if>
+
+    </select>
+
+    <update id="updateChatArchiveBookmarks" parameterType="com.example.chatx_api.dto.ChatArchiveDto">
+        UPDATE
+            chat_archive ca
+        SET ca.is_chat_archive_bookmarks = NOT ca.is_chat_archive_bookmarks
+        WHERE
+            ca.chat_archive_id = #{chatArchiveId}
+    </update>
+
+
+    <delete id="deleteChatArchive" parameterType="com.example.chatx_api.dto.ChatArchiveDto">
+        DELETE FROM
+            chat_archive
+        WHERE
+            chat_archive_id = #{chatArchiveId}
+    </delete>
+
+
+</mapper>

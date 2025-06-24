@@ -35,19 +35,23 @@ public class CookieServiceImpl implements CookieService{
                 .sameSite("None")
                 .build();
 
-        response.addHeader("Set-Cookie", cookie.toString());
+        response.setHeader("Set-Cookie", cookie.toString());
 
     }
 
     @Override
     public ResponseEntity<?> clearCookie(HttpServletResponse response) {
 
-        Cookie cookie = new Cookie("memberId", null);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
+        ResponseCookie cookie = ResponseCookie.from("memberId", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
 
-        response.addCookie(cookie);
+        response.setHeader("Set-Cookie", cookie.toString());
+
         return ResponseEntity.ok("로그아웃 및 쿠키 제거 성공");
     }
 
