@@ -1,22 +1,18 @@
 package com.example.chatx_api.service;
 
-import com.example.chatx_api.dto.ChatArchiveDto;
-import com.example.chatx_api.dto.ChatArchiveResponseDto;
-import com.example.chatx_api.dto.ChatMessageDto;
-
-import java.util.List;
+import com.example.chatx_api.dto.request.ChatArchiveRequestDto;
+import com.example.chatx_api.dto.response.ChatArchiveResponseDto;
+import com.example.chatx_api.dto.request.ChatRequestDto;
 
 public interface ChatService {
 
-    boolean chatSend(ChatMessageDto chatMessageDto);
+    boolean chatSend(ChatRequestDto chatRequestDto);
 
-    boolean chatArchiveSave(ChatArchiveDto chatArchiveDto);
+    boolean chatArchiveSave(ChatArchiveRequestDto chatArchiveRequestDto);
 
-    ChatArchiveResponseDto getChatArchive(ChatArchiveDto chatArchiveDto);
+    ChatArchiveResponseDto getChatArchive(ChatArchiveRequestDto chatArchiveRequestDto);
 
-    String getChatArchiveMessage(ChatArchiveDto chatArchiveDto);
+    boolean setChatArchiveBookmarks(ChatArchiveRequestDto chatArchiveRequestDto);
 
-    boolean setChatArchiveBookmarks(ChatArchiveDto chatArchiveDto);
-
-    boolean delChatArchive(ChatArchiveDto chatArchiveDto);
+    boolean delChatArchive(ChatArchiveRequestDto chatArchiveRequestDto);
 }

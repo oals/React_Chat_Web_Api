@@ -1,13 +1,16 @@
 package com.example.chatx_api.service;
 
 import com.example.chatx_api.dao.ChatDao;
-import com.example.chatx_api.dto.ChatArchiveDto;
-import com.example.chatx_api.dto.ChatArchiveResponseDto;
-import com.example.chatx_api.dto.ChatMessageDto;
+import com.example.chatx_api.dto.request.ChatArchiveRequestDto;
+import com.example.chatx_api.dto.response.ChatArchiveResponseDto;
+import com.example.chatx_api.dto.request.ChatRequestDto;
+import com.example.chatx_api.mongo.ChatArchive;
+import com.example.chatx_api.mongo.ChatArchiveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,15 +19,16 @@ import java.util.List;
 public class ChatServiceImpl implements ChatService{
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatArchiveService chatArchiveService;
     private final ChatDao chatDao;
 
     @Override
-    public boolean chatSend(ChatMessageDto chatMessageDto) {
+    public boolean chatSend(ChatRequestDto chatRequestDto) {
 
         try {
-            System.out.println("소켓 전송 경로 : /topic/chat/" + chatMessageDto.getChatRoomId());
-            String destination = "/topic/chat/" + chatMessageDto.getChatRoomId();
-            messagingTemplate.convertAndSend(destination, chatMessageDto);
+            System.out.println("소켓 전송 경로 : /topic/chat/" + chatRequestDto.getChatRoomId());
+            String destination = "/topic/chat/" + chatRequestDto.getChatRoomId();
+            messagingTemplate.convertAndSend(destination, chatRequestDto);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -34,11 +38,22 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public boolean chatArchiveSave(ChatArchiveDto chatArchiveDto) {
+    public boolean chatArchiveSave(ChatArchiveRequestDto chatArchiveRequestDto) {
 
         try {
-            chatArchiveDto.setChatArchiveBookmarks(false);
-            chatDao.insertChatArchive(chatArchiveDto);
+            chatArchiveRequestDto.setChatArchiveBookmarks(false);
+            chatDao.insertChatArchive(chatArchiveRequestDto);
+
+            System.out.println("체크123");
+            System.out.println(chatArchiveRequestDto.getChatArchiveId());
+
+            ChatArchive archive = new ChatArchive();
+            archive.setChatArchiveId(chatArchiveRequestDto.getChatArchiveId());
+            archive.setChatArchiveJson(chatArchiveRequestDto.getChatArchiveJson());
+            archive.setChatArchiveCreateDate(LocalDateTime.now());
+
+            chatArchiveService.insertChatArchive(archive);
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,15 +62,15 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public ChatArchiveResponseDto getChatArchive(ChatArchiveDto chatArchiveDto) {
+    public ChatArchiveResponseDto getChatArchive(ChatArchiveRequestDto chatArchiveRequestDto) {
         try {
-            List<ChatArchiveDto> chatArchiveDtoList = new ArrayList<>();
-            chatArchiveDto.setOffset(chatArchiveDto.getOffset());
+            List<com.example.chatx_api.dto.ChatArchive> chatArchiveDtoList = new ArrayList<>();
+            chatArchiveRequestDto.setOffset(chatArchiveRequestDto.getOffset());
 
-            int totalCount = chatDao.selectChatArchiveTotalCount(chatArchiveDto);
+            int totalCount = chatDao.selectChatArchiveTotalCount(chatArchiveRequestDto);
 
             if (totalCount != 0) {
-                chatArchiveDtoList = chatDao.selectChatArchive(chatArchiveDto);
+                chatArchiveDtoList = chatDao.selectChatArchive(chatArchiveRequestDto);
             }
 
             return ChatArchiveResponseDto.builder()
@@ -69,21 +84,10 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public String getChatArchiveMessage(ChatArchiveDto chatArchiveDto) {
-
-
-
-
-
-
-        return "";
-    }
-
-    @Override
-    public boolean setChatArchiveBookmarks(ChatArchiveDto chatArchiveDto) {
+    public boolean setChatArchiveBookmarks(ChatArchiveRequestDto chatArchiveRequestDto) {
 
         try {
-            chatDao.updateChatArchiveBookmarks(chatArchiveDto);
+            chatDao.updateChatArchiveBookmarks(chatArchiveRequestDto);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,9 +96,9 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public boolean delChatArchive(ChatArchiveDto chatArchiveDto) {
+    public boolean delChatArchive(ChatArchiveRequestDto chatArchiveRequestDto) {
         try {
-            chatDao.deleteChatArchive(chatArchiveDto);
+            chatDao.deleteChatArchive(chatArchiveRequestDto);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

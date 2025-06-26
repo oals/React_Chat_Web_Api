@@ -1,16 +1,14 @@
 package com.example.chatx_api.restController;
 
 import com.example.auth_common.resolver.AuthenticatedMemberId;
-import com.example.chatx_api.dto.ChatArchiveDto;
-import com.example.chatx_api.dto.ChatArchiveResponseDto;
-import com.example.chatx_api.dto.ChatMessageDto;
+import com.example.chatx_api.dto.request.ChatArchiveRequestDto;
+import com.example.chatx_api.dto.response.ChatArchiveResponseDto;
+import com.example.chatx_api.dto.request.ChatRequestDto;
 import com.example.chatx_api.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,10 +17,10 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/api/chat/send")
-    public ResponseEntity<String> chatSend(@AuthenticatedMemberId String memberId, @RequestBody ChatMessageDto chatMessageDto) {
+    public ResponseEntity<String> chatSend(@AuthenticatedMemberId String memberId, @RequestBody ChatRequestDto chatRequestDto) {
 
-        chatMessageDto.setMemberId(Long.parseLong(memberId));
-        boolean result = chatService.chatSend(chatMessageDto);
+        chatRequestDto.setMemberId(Long.parseLong(memberId));
+        boolean result = chatService.chatSend(chatRequestDto);
 
         if (result) {
             return ResponseEntity.ok("채팅 메시지 전송 성공");
@@ -33,10 +31,10 @@ public class ChatController {
     }
 
     @PostMapping("/api/chat/save")
-    public ResponseEntity<String> chatArchiveSave(@AuthenticatedMemberId String memberId, @RequestBody ChatArchiveDto chatArchiveDto) {
+    public ResponseEntity<String> chatArchiveSave(@AuthenticatedMemberId String memberId, @RequestBody ChatArchiveRequestDto chatArchiveRequestDto) {
 
-        chatArchiveDto.setMemberId(Long.parseLong(memberId));
-        boolean result = chatService.chatArchiveSave(chatArchiveDto);
+        chatArchiveRequestDto.setMemberId(Long.parseLong(memberId));
+        boolean result = chatService.chatArchiveSave(chatArchiveRequestDto);
 
         if (result) {
             return ResponseEntity.ok("채팅 저장 성공");
@@ -48,12 +46,12 @@ public class ChatController {
     }
 
     @GetMapping("/api/chat/getChatArchive")
-    public ResponseEntity<?> getChatArchive(@AuthenticatedMemberId String memberId, ChatArchiveDto chatArchiveDto) {
+    public ResponseEntity<?> getChatArchive(@AuthenticatedMemberId String memberId, ChatArchiveRequestDto chatArchiveRequestDto) {
 
         Long parsedMemberId = Long.parseLong(memberId);
-        chatArchiveDto.setMemberId(parsedMemberId);
+        chatArchiveRequestDto.setMemberId(parsedMemberId);
 
-        ChatArchiveResponseDto result = chatService.getChatArchive(chatArchiveDto);
+        ChatArchiveResponseDto result = chatService.getChatArchive(chatArchiveRequestDto);
 
         if (result != null) {
             return ResponseEntity.ok(result);
@@ -64,9 +62,9 @@ public class ChatController {
     }
 
     @PostMapping("/api/chat/setChatArchiveBookmarks")
-    public ResponseEntity<?> setChatArchiveBookmarks(@RequestBody ChatArchiveDto chatArchiveDto) {
+    public ResponseEntity<?> setChatArchiveBookmarks(@RequestBody ChatArchiveRequestDto chatArchiveRequestDto) {
 
-        boolean result = chatService.setChatArchiveBookmarks(chatArchiveDto);
+        boolean result = chatService.setChatArchiveBookmarks(chatArchiveRequestDto);
 
         if (result) {
             return ResponseEntity.ok("즐겨찾기 업데이트 성공");
@@ -77,28 +75,15 @@ public class ChatController {
     }
 
     @PostMapping("/api/chat/delChatArchive")
-    public ResponseEntity<?> delChatArchive(@RequestBody ChatArchiveDto chatArchiveDto) {
+    public ResponseEntity<?> delChatArchive(@RequestBody ChatArchiveRequestDto chatArchiveRequestDto) {
 
-        boolean result = chatService.delChatArchive(chatArchiveDto);
+        boolean result = chatService.delChatArchive(chatArchiveRequestDto);
 
         if (result) {
             return ResponseEntity.ok("채팅 삭제 성공");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("채팅 삭제 실패");
-        }
-    }
-
-    @GetMapping("/api/chat/getChatArchiveMessage")
-    public ResponseEntity<?> getChatArchiveMessage(ChatArchiveDto chatArchiveDto ) {
-
-        String chatArchiveMessageJson = chatService.getChatArchiveMessage(chatArchiveDto);
-
-        if (chatArchiveMessageJson != null) {
-            return ResponseEntity.ok("채팅 아카이브 조회 성공");
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("채팅 아카이브 조회 실패");
         }
     }
 

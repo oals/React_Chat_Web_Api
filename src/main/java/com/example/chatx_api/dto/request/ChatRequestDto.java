@@ -1,4 +1,4 @@
-package com.example.chatx_api.dto;
+package com.example.chatx_api.dto.request;
 
 import lombok.*;
 
@@ -7,11 +7,12 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMessageDto {
-
-    private Long chatRoomId;
+public class ChatRequestDto {
 
     private Long memberId;
 
+    private Long chatRoomId;
+
     private String chatMessage;
+
 }

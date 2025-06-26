@@ -5,24 +5,58 @@
 
 <mapper namespace="com.example.chatx_api.dao.ChatDao">
 
-    <insert id="insertChatArchive" parameterType="com.example.chatx_api.dto.ChatArchiveDto">
+    <insert id="insertChatArchive" parameterType="com.example.chatx_api.dto.request.ChatArchiveRequestDto">
+
+        <selectKey keyProperty="chatArchiveId" resultType="Long" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
 
         INSERT INTO chat_archive (
             chat_archive_title,
             chat_archive_date,
-            chat_archive_json,
             is_chat_archive_bookmarks,
             member_id
         ) VALUES (
             #{chatArchiveTitle},
             NOW(),
-            #{chatArchiveJson},
             #{isChatArchiveBookmarks},
             #{memberId}
         )
     </insert>
 
-    <select id="selectChatArchive" parameterType="com.example.chatx_api.dto.ChatArchiveDto" resultType="com.example.chatx_api.dto.ChatArchiveDto">
+    <insert id="insertGroupChatRoom" parameterType="com.example.chatx_api.dto.request.GroupChatRequestDto">
+
+        <selectKey keyProperty="groupChatRoomId" resultType="Long" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+        INSERT INTO group_chat_room (
+            group_chat_room_title,
+            group_chat_room_max_participants,
+            group_chat_room_topic,
+            group_chat_room_create_date,
+            member_id
+        ) VALUES (
+            #{groupChatRoomTitle},
+            #{groupChatRoomMaxParticipants},
+            #{groupChatRoomTopic},
+            NOW(),
+            #{memberId}
+        )
+    </insert>
+
+    <insert id="insertGroupChatRoomMember" parameterType="com.example.chatx_api.dto.request.GroupChatRequestDto">
+
+        INSERT INTO group_chat_room_member (
+            group_chat_room_id,
+            member_id
+        ) VALUES (
+            #{groupChatRoomId},
+            #{memberId}
+        )
+    </insert>
+
+    <select id="selectChatArchive" parameterType="com.example.chatx_api.dto.request.ChatArchiveRequestDto" resultType="com.example.chatx_api.dto.ChatArchive">
 
         SELECT
             ca.chat_archive_id AS chatArchiveId,
@@ -44,8 +78,65 @@
 
     </select>
 
+    <select id="selectGroupChatRoom" parameterType="com.example.chatx_api.dto.request.GroupChatRequestDto" resultType="com.example.chatx_api.dto.GroupChatRoom">
 
-    <select id="selectChatArchiveTotalCount" parameterType="com.example.chatx_api.dto.ChatArchiveDto" resultType="int">
+        SELECT
+            gc.group_chat_room_id AS groupChatRoomId,
+            gc.group_chat_room_title AS groupChatRoomTitle,
+            gc.group_chat_room_max_participants AS groupChatRoomMaxParticipants,
+            gc.group_chat_room_topic AS groupChatRoomTopic,
+            gc.group_chat_room_create_date AS groupChatRoomCreateDate,
+            COUNT(gcm.member_id) AS currentParticipants,
+            CASE
+                WHEN EXISTS (
+                SELECT
+                        1
+                FROM
+                    group_chat_room_member gcm2
+                WHERE
+                    gcm2.group_chat_room_id = gc.group_chat_room_id
+                AND
+                    gcm2.member_id = #{memberId}
+                ) THEN TRUE
+                ELSE FALSE
+            END AS isJoinGroupChatRoom
+        FROM
+            group_chat_room gc
+        LEFT JOIN group_chat_room_member gcm
+        ON gc.group_chat_room_id = gcm.group_chat_room_id
+        <where>
+            <if test="groupChatRoomTopic != '전체'">
+                gc.group_chat_room_topic = #{groupChatRoomTopic}
+            </if>
+        </where>
+        GROUP BY
+            gc.group_chat_room_id,
+            gc.group_chat_room_title,
+            gc.group_chat_room_max_participants,
+            gc.group_chat_room_topic,
+            gc.group_chat_room_create_date
+        ORDER BY
+            gc.group_chat_room_id DESC
+        LIMIT #{size} OFFSET #{offset};
+
+    </select>
+
+    <select id="selectGroupChatRoomTotalCount" parameterType="com.example.chatx_api.dto.request.GroupChatRequestDto" resultType="int">
+
+        SELECT
+            COUNT(DISTINCT gc.group_chat_room_id)
+        FROM
+            group_chat_room gc
+        LEFT JOIN group_chat_room_member gcm
+            ON gc.group_chat_room_id = gcm.group_chat_room_id
+        <where>
+            <if test="groupChatRoomTopic != '전체'">
+                gc.group_chat_room_topic = #{groupChatRoomTopic}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectChatArchiveTotalCount" parameterType="com.example.chatx_api.dto.request.ChatArchiveRequestDto" resultType="int">
 
         SELECT
             count(*)
@@ -60,7 +151,7 @@
 
     </select>
 
-    <update id="updateChatArchiveBookmarks" parameterType="com.example.chatx_api.dto.ChatArchiveDto">
+    <update id="updateChatArchiveBookmarks" parameterType="com.example.chatx_api.dto.request.ChatArchiveRequestDto">
         UPDATE
             chat_archive ca
         SET ca.is_chat_archive_bookmarks = NOT ca.is_chat_archive_bookmarks
@@ -69,7 +160,7 @@
     </update>
 
 
-    <delete id="deleteChatArchive" parameterType="com.example.chatx_api.dto.ChatArchiveDto">
+    <delete id="deleteChatArchive" parameterType="com.example.chatx_api.dto.request.ChatArchiveRequestDto">
         DELETE FROM
             chat_archive
         WHERE

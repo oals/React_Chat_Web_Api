@@ -1,6 +1,11 @@
 package com.example.chatx_api.dao;
 
-import com.example.chatx_api.dto.ChatArchiveDto;
+import com.example.chatx_api.dto.ChatArchive;
+import com.example.chatx_api.dto.GroupChatRoom;
+import com.example.chatx_api.dto.request.ChatArchiveRequestDto;
+import com.example.chatx_api.dto.response.GroupChatResponseDto;
+import com.example.chatx_api.dto.response.ChatArchiveResponseDto;
+import com.example.chatx_api.dto.request.GroupChatRequestDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -8,14 +13,23 @@ import java.util.List;
 @Mapper
 public interface ChatDao {
 
-    void insertChatArchive(ChatArchiveDto chatArchiveDto);
+    void insertChatArchive(ChatArchiveRequestDto chatArchiveRequestDto);
 
-    List<ChatArchiveDto> selectChatArchive(ChatArchiveDto chatArchiveDto);
+    List<ChatArchive> selectChatArchive(ChatArchiveRequestDto chatArchiveRequestDto);
 
-    int selectChatArchiveTotalCount(ChatArchiveDto chatArchiveDto);
+    int selectChatArchiveTotalCount(ChatArchiveRequestDto chatArchiveRequestDto);
 
-    void updateChatArchiveBookmarks(ChatArchiveDto chatArchiveDto);
+    void updateChatArchiveBookmarks(ChatArchiveRequestDto chatArchiveRequestDto);
 
-    void deleteChatArchive(ChatArchiveDto chatArchiveDto);
+    void deleteChatArchive(ChatArchiveRequestDto chatArchiveRequestDto);
+
+
+    void insertGroupChatRoom(GroupChatRequestDto groupChatRequestDto);
+
+    void insertGroupChatRoomMember(GroupChatRequestDto groupChatRequestDto);
+
+    List<GroupChatRoom> selectGroupChatRoom(GroupChatRequestDto groupChatRequestDto);
+
+    int selectGroupChatRoomTotalCount(GroupChatRequestDto groupChatRequestDto);
 
 }

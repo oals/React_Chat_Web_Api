@@ -40,6 +40,8 @@ dependencies {
 	implementation 'org.webjars:sockjs-client:1.5.1'
 	implementation 'org.webjars:stomp-websocket:2.3.4'
 
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
 	implementation 'com.example:auth_common:0.0.7-SNAPSHOT'
 }
 
