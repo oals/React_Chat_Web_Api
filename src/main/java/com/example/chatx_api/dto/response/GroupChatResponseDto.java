@@ -22,4 +22,8 @@ public class GroupChatResponseDto {
    private String chatMessage;
 
    private Long memberId;
+
+   private boolean isJoinNotice;
+
+   private boolean isExitNotice;
 }

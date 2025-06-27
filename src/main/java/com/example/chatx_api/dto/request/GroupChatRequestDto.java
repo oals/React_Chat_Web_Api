@@ -16,10 +16,10 @@ public class GroupChatRequestDto extends PaginationDto {
 
     private String groupChatRoomTitle;
 
-    private String groupChatRoomMaxParticipants;
-
     private String groupChatRoomTopic;
 
     private String chatMessage;
+
+    private String searchText;
 
 }

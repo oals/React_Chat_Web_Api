@@ -32,13 +32,11 @@
 
         INSERT INTO group_chat_room (
             group_chat_room_title,
-            group_chat_room_max_participants,
             group_chat_room_topic,
             group_chat_room_create_date,
             member_id
         ) VALUES (
             #{groupChatRoomTitle},
-            #{groupChatRoomMaxParticipants},
             #{groupChatRoomTopic},
             NOW(),
             #{memberId}
@@ -83,30 +81,19 @@
         SELECT
             gc.group_chat_room_id AS groupChatRoomId,
             gc.group_chat_room_title AS groupChatRoomTitle,
-            gc.group_chat_room_max_participants AS groupChatRoomMaxParticipants,
             gc.group_chat_room_topic AS groupChatRoomTopic,
             gc.group_chat_room_create_date AS groupChatRoomCreateDate,
-            COUNT(gcm.member_id) AS currentParticipants,
-            CASE
-                WHEN EXISTS (
-                SELECT
-                        1
-                FROM
-                    group_chat_room_member gcm2
-                WHERE
-                    gcm2.group_chat_room_id = gc.group_chat_room_id
-                AND
-                    gcm2.member_id = #{memberId}
-                ) THEN TRUE
-                ELSE FALSE
-            END AS isJoinGroupChatRoom
+            COUNT(gcm.member_id) AS currentParticipants
         FROM
             group_chat_room gc
         LEFT JOIN group_chat_room_member gcm
         ON gc.group_chat_room_id = gcm.group_chat_room_id
         <where>
-            <if test="groupChatRoomTopic != '전체'">
+            <if test="groupChatRoomTopic != null and groupChatRoomTopic != '전체'">
                 gc.group_chat_room_topic = #{groupChatRoomTopic}
+            </if>
+            <if test="searchText != null and searchText != ''">
+                AND REPLACE(LOWER(gc.group_chat_room_title), ' ', '') LIKE CONCAT('%', REPLACE(LOWER(#{searchText}), ' ', ''), '%')
             </if>
         </where>
         GROUP BY
@@ -130,8 +117,11 @@
         LEFT JOIN group_chat_room_member gcm
             ON gc.group_chat_room_id = gcm.group_chat_room_id
         <where>
-            <if test="groupChatRoomTopic != '전체'">
+            <if test="groupChatRoomTopic != null and groupChatRoomTopic != '전체'">
                 gc.group_chat_room_topic = #{groupChatRoomTopic}
+            </if>
+            <if test="searchText != null and searchText != ''">
+                AND REPLACE(LOWER(gc.group_chat_room_title), ' ', '') LIKE CONCAT('%', REPLACE(LOWER(#{searchText}), ' ', ''), '%')
             </if>
         </where>
     </select>
@@ -159,12 +149,20 @@
             ca.chat_archive_id = #{chatArchiveId}
     </update>
 
-
     <delete id="deleteChatArchive" parameterType="com.example.chatx_api.dto.request.ChatArchiveRequestDto">
         DELETE FROM
             chat_archive
         WHERE
             chat_archive_id = #{chatArchiveId}
+    </delete>
+
+    <delete id="deleteGroupChatRoomMember" parameterType="com.example.chatx_api.dto.request.GroupChatRequestDto">
+        DELETE FROM
+            group_chat_room_member
+        WHERE
+            group_chat_room_id = #{groupChatRoomId}
+        AND
+            member_id = #{memberId}
     </delete>
 
 

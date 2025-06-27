@@ -32,4 +32,6 @@ public interface ChatDao {
 
     int selectGroupChatRoomTotalCount(GroupChatRequestDto groupChatRequestDto);
 
+    void deleteGroupChatRoomMember(GroupChatRequestDto groupChatRequestDto);
+
 }

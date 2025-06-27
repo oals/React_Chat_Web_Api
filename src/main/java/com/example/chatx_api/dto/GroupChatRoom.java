@@ -16,14 +16,10 @@ public class GroupChatRoom {
     private Long memberId;
 
     private String groupChatRoomTitle;
-
-    private String groupChatRoomMaxParticipants;
     
     private int currentParticipants;
 
     private String groupChatRoomTopic;
-
-    private boolean isJoinGroupChatRoom;
 
     private LocalDateTime groupChatRoomCreateDate;
 

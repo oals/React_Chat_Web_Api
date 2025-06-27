@@ -74,7 +74,7 @@ public class ChatController {
         }
     }
 
-    @PostMapping("/api/chat/delChatArchive")
+    @DeleteMapping("/api/chat/delChatArchive")
     public ResponseEntity<?> delChatArchive(@RequestBody ChatArchiveRequestDto chatArchiveRequestDto) {
 
         boolean result = chatService.delChatArchive(chatArchiveRequestDto);
