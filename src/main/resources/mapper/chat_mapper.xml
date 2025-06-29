@@ -43,17 +43,6 @@
         )
     </insert>
 
-    <insert id="insertGroupChatRoomMember" parameterType="com.example.chatx_api.dto.request.GroupChatRequestDto">
-
-        INSERT INTO group_chat_room_member (
-            group_chat_room_id,
-            member_id
-        ) VALUES (
-            #{groupChatRoomId},
-            #{memberId}
-        )
-    </insert>
-
     <select id="selectChatArchive" parameterType="com.example.chatx_api.dto.request.ChatArchiveRequestDto" resultType="com.example.chatx_api.dto.ChatArchive">
 
         SELECT
@@ -72,7 +61,7 @@
 
         ORDER BY
             ca.chat_archive_id DESC
-        LIMIT #{size} OFFSET #{offset};
+        LIMIT 12 OFFSET #{offset};
 
     </select>
 
@@ -82,12 +71,9 @@
             gc.group_chat_room_id AS groupChatRoomId,
             gc.group_chat_room_title AS groupChatRoomTitle,
             gc.group_chat_room_topic AS groupChatRoomTopic,
-            gc.group_chat_room_create_date AS groupChatRoomCreateDate,
-            COUNT(gcm.member_id) AS currentParticipants
+            gc.group_chat_room_create_date AS groupChatRoomCreateDate
         FROM
             group_chat_room gc
-        LEFT JOIN group_chat_room_member gcm
-        ON gc.group_chat_room_id = gcm.group_chat_room_id
         <where>
             <if test="groupChatRoomTopic != null and groupChatRoomTopic != '전체'">
                 gc.group_chat_room_topic = #{groupChatRoomTopic}
@@ -95,16 +81,22 @@
             <if test="searchText != null and searchText != ''">
                 AND REPLACE(LOWER(gc.group_chat_room_title), ' ', '') LIKE CONCAT('%', REPLACE(LOWER(#{searchText}), ' ', ''), '%')
             </if>
+            <if test="groupChatRoomIdList != null and groupChatRoomIdList.size() > 0">
+                AND gc.group_chat_room_id IN
+                <foreach item="id" collection="groupChatRoomIdList" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
         </where>
-        GROUP BY
-            gc.group_chat_room_id,
-            gc.group_chat_room_title,
-            gc.group_chat_room_max_participants,
-            gc.group_chat_room_topic,
-            gc.group_chat_room_create_date
-        ORDER BY
-            gc.group_chat_room_id DESC
-        LIMIT #{size} OFFSET #{offset};
+
+        <if test="groupChatRoomIdList != null and groupChatRoomIdList.size() > 0">
+            ORDER BY FIELD(gc.group_chat_room_id,
+            <foreach item="id" collection="groupChatRoomIdList" separator=",">
+                #{id}
+            </foreach>
+            )
+        </if>
+
 
     </select>
 
@@ -114,8 +106,6 @@
             COUNT(DISTINCT gc.group_chat_room_id)
         FROM
             group_chat_room gc
-        LEFT JOIN group_chat_room_member gcm
-            ON gc.group_chat_room_id = gcm.group_chat_room_id
         <where>
             <if test="groupChatRoomTopic != null and groupChatRoomTopic != '전체'">
                 gc.group_chat_room_topic = #{groupChatRoomTopic}
@@ -155,15 +145,5 @@
         WHERE
             chat_archive_id = #{chatArchiveId}
     </delete>
-
-    <delete id="deleteGroupChatRoomMember" parameterType="com.example.chatx_api.dto.request.GroupChatRequestDto">
-        DELETE FROM
-            group_chat_room_member
-        WHERE
-            group_chat_room_id = #{groupChatRoomId}
-        AND
-            member_id = #{memberId}
-    </delete>
-
 
 </mapper>

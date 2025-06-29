@@ -12,14 +12,14 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-public class ChatArchiveController {
+public class MongoController {
 
-    private final ChatArchiveService chatArchiveService;
+    private final MongoService mongoService;
 
     @GetMapping("/api/chat/getChatArchiveMessage")
     public ResponseEntity<?> getChatArchiveMessage(ChatArchiveRequestDto chatArchiveRequestDto) {
 
-        Optional<ChatArchive> chatArchiveOpt = chatArchiveService.getChatArchiveMessage(chatArchiveRequestDto);
+        Optional<ChatArchive> chatArchiveOpt = mongoService.getChatArchiveMessage(chatArchiveRequestDto);
 
         if (chatArchiveOpt.isPresent()) {
             ChatArchive archive = chatArchiveOpt.get();

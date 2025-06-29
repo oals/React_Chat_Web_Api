@@ -26,12 +26,8 @@ public interface ChatDao {
 
     void insertGroupChatRoom(GroupChatRequestDto groupChatRequestDto);
 
-    void insertGroupChatRoomMember(GroupChatRequestDto groupChatRequestDto);
-
     List<GroupChatRoom> selectGroupChatRoom(GroupChatRequestDto groupChatRequestDto);
 
     int selectGroupChatRoomTotalCount(GroupChatRequestDto groupChatRequestDto);
-
-    void deleteGroupChatRoomMember(GroupChatRequestDto groupChatRequestDto);
 
 }

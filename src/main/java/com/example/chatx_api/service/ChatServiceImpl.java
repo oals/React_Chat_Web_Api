@@ -5,7 +5,8 @@ import com.example.chatx_api.dto.request.ChatArchiveRequestDto;
 import com.example.chatx_api.dto.response.ChatArchiveResponseDto;
 import com.example.chatx_api.dto.request.ChatRequestDto;
 import com.example.chatx_api.mongo.ChatArchive;
-import com.example.chatx_api.mongo.ChatArchiveService;
+import com.example.chatx_api.mongo.MongoService;
+import com.example.chatx_api.mongo.MongoServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.List;
 public class ChatServiceImpl implements ChatService{
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final ChatArchiveService chatArchiveService;
+    private final MongoService mongoService;
     private final ChatDao chatDao;
 
     @Override
@@ -44,15 +45,12 @@ public class ChatServiceImpl implements ChatService{
             chatArchiveRequestDto.setChatArchiveBookmarks(false);
             chatDao.insertChatArchive(chatArchiveRequestDto);
 
-            System.out.println("체크123");
-            System.out.println(chatArchiveRequestDto.getChatArchiveId());
-
             ChatArchive archive = new ChatArchive();
             archive.setChatArchiveId(chatArchiveRequestDto.getChatArchiveId());
             archive.setChatArchiveJson(chatArchiveRequestDto.getChatArchiveJson());
             archive.setChatArchiveCreateDate(LocalDateTime.now());
 
-            chatArchiveService.insertChatArchive(archive);
+            mongoService.insertChatArchive(archive);
 
             return true;
         } catch (Exception e) {
@@ -99,6 +97,7 @@ public class ChatServiceImpl implements ChatService{
     public boolean delChatArchive(ChatArchiveRequestDto chatArchiveRequestDto) {
         try {
             chatDao.deleteChatArchive(chatArchiveRequestDto);
+            mongoService.deleteChatArchive(chatArchiveRequestDto);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

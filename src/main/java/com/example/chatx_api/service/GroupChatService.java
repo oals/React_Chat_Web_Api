@@ -13,9 +13,6 @@ public interface GroupChatService {
 
     GroupChatResponseDto getGroupChatRoomList(GroupChatRequestDto groupChatRequestDto);
 
-    boolean joinGroupChatRoom(GroupChatRequestDto groupChatRequestDto);
-
     boolean joinGroupChatMessageSend(GroupChatRequestDto groupChatRequestDto);
 
-    boolean groupChatRoomExit(GroupChatRequestDto groupChatRequestDto);
 }

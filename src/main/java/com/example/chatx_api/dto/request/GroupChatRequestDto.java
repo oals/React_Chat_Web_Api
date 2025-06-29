@@ -3,6 +3,8 @@ package com.example.chatx_api.dto.request;
 import com.example.chatx_api.dto.PaginationDto;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -21,5 +23,7 @@ public class GroupChatRequestDto extends PaginationDto {
     private String chatMessage;
 
     private String searchText;
+
+    private List<Long> groupChatRoomIdList;
 
 }

@@ -46,21 +46,6 @@ public class GroupChatController {
 
     }
 
-    @PostMapping("/api/groupChat/join")
-    public ResponseEntity<?> joinGroupChatRoom(@AuthenticatedMemberId String memberId, @RequestBody GroupChatRequestDto groupChatRequestDto) {
-
-        groupChatRequestDto.setMemberId(Long.parseLong(memberId));
-        boolean result = groupChatService.joinGroupChatRoom(groupChatRequestDto);
-
-        if (result) {
-            return ResponseEntity.ok("그룹 채팅 입장 성공");
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("그룹 채팅 입장 실패");
-        }
-
-    }
-
     @PostMapping("/api/groupChat/send")
     public ResponseEntity<?> groupChatSend(@AuthenticatedMemberId String memberId, @RequestBody GroupChatRequestDto groupChatRequestDto) {
 
@@ -89,20 +74,6 @@ public class GroupChatController {
                     .body("그룹 채팅 입장 메세지 전송 실패");
         }
 
-    }
-
-    @DeleteMapping("/api/groupChat/exit")
-    public ResponseEntity<?> groupChatRoomExit(@AuthenticatedMemberId String memberId, @RequestBody GroupChatRequestDto groupChatRequestDto) {
-
-        groupChatRequestDto.setMemberId(Long.parseLong(memberId));
-        boolean result = groupChatService.groupChatRoomExit(groupChatRequestDto);
-
-        if (result) {
-            return ResponseEntity.ok("그룹 채팅 나가기 성공");
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("그룹 채팅 나가기 실패");
-        }
     }
 
 }
