@@ -46,7 +46,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'redis.clients:jedis:4.3.1'
 
-	implementation 'com.example:auth_common:0.0.7-SNAPSHOT'
+//	implementation 'com.example:auth_common:0.0.7-SNAPSHOT'
+	implementation files('/var/jenkins_home/workspace/chatx_pipeline/auth-module/auth_common-0.0.7-SNAPSHOT-plain.jar')
 }
 
 tasks.named('test') {
