@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 @Configuration
 public class FirebaseConfig {
@@ -18,12 +17,23 @@ public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() throws IOException {
-        FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath);
 
+        InputStream serviceAccountStream = null;
+
+        File file = new File(firebaseConfigPath);
+        if (file.exists() && file.isFile()) {
+            serviceAccountStream = new FileInputStream(file);
+        } else {
+            serviceAccountStream = getClass().getClassLoader().getResourceAsStream(firebaseConfigPath);
+            if (serviceAccountStream == null) {
+                throw new IOException("Firebase config file not found in file system or classpath: " + firebaseConfigPath);
+            }
+        }
         FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
                 .build();
 
         FirebaseApp.initializeApp(options);
+
     }
 }

@@ -23,16 +23,11 @@
     <select id="selectMember" parameterType="com.example.chatx_api.dto.MemberDto" resultType="Long">
 
         SELECT
-            M.MEMBER_ID
+            m.member_id
         FROM
-            MEMBER M
+            member m
         WHERE
-            M.MEMBER_EMAIL = #{memberEmail}
+            m.member_email = #{memberEmail}
 
     </select>
-
-
-
-
-
 </mapper>
