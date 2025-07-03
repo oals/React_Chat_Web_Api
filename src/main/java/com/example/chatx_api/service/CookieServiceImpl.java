@@ -29,10 +29,10 @@ public class CookieServiceImpl implements CookieService{
 
         ResponseCookie cookie = ResponseCookie.from("memberId", cookieValue)
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(Duration.ofDays(1))
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         response.setHeader("Set-Cookie", cookie.toString());
@@ -44,10 +44,10 @@ public class CookieServiceImpl implements CookieService{
 
         ResponseCookie cookie = ResponseCookie.from("memberId", "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         response.setHeader("Set-Cookie", cookie.toString());
