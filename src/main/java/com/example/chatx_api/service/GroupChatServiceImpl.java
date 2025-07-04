@@ -96,7 +96,12 @@ public class GroupChatServiceImpl implements GroupChatService{
             groupChatResponseDtoList = chatDao.selectGroupChatRoom(groupChatRequestDto);
 
             for ( int i = 0; i < groupChatResponseDtoList.size(); i++ ) {
-                int memberCount = roomMemberCountList.get(i);
+                int memberCount = 0;
+
+                if (i < roomMemberCountList.size()) {
+                    memberCount = roomMemberCountList.get(i);
+                }
+
                 groupChatResponseDtoList.get(i).setCurrentParticipants(memberCount);
             }
         }
