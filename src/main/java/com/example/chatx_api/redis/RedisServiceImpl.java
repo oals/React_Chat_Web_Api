@@ -8,10 +8,9 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,20 +27,27 @@ public class RedisServiceImpl implements RedisService{
 
     @Override
     public void syncGroupChatMemberCountToZSet(GroupChatRequestDto groupChatRequestDto) {
-        String key = "groupChatRoom:" + groupChatRequestDto.getGroupChatRoomId();
+        String key = "groupChatRoom:" + groupChatRequestDto.getGroupChatRoomId() + "::" + groupChatRequestDto.getGroupChatRoomTopic();
         Long roomId = groupChatRequestDto.getGroupChatRoomId();
         Long count = redisTemplate.opsForSet().size(key);
 
         double compositeScore = count * 1_000_000_000L + roomId;
 
-        redisTemplate.opsForZSet().add("groupChatRoom:memberCounts", roomId.toString(), compositeScore);
+        String memberValue = roomId + "::" + groupChatRequestDto.getGroupChatRoomTopic();
+
+        redisTemplate.opsForZSet().add("groupChatRoom:memberCounts", memberValue, compositeScore);
+
     }
 
     @Override
     public boolean joinGroupChatRoom(GroupChatRequestDto groupChatRequestDto) {
         try {
-            redisTemplate.opsForSet().add("groupChatRoom:" + groupChatRequestDto.getGroupChatRoomId(), groupChatRequestDto.getMemberId().toString());
+            String roomKey = "groupChatRoom:" + groupChatRequestDto.getGroupChatRoomId() + "::" + groupChatRequestDto.getGroupChatRoomTopic();
+            redisTemplate.opsForSet()
+                    .add(roomKey, groupChatRequestDto.getMemberId().toString());
+
             syncGroupChatMemberCountToZSet(groupChatRequestDto);
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,7 +58,7 @@ public class RedisServiceImpl implements RedisService{
     @Override
     public boolean groupChatRoomExit(GroupChatRequestDto groupChatRequestDto) {
         try {
-            String key = "groupChatRoom:" + groupChatRequestDto.getGroupChatRoomId();
+            String key = "groupChatRoom:" + groupChatRequestDto.getGroupChatRoomId() + "::" + groupChatRequestDto.getGroupChatRoomTopic();
             Long roomId = groupChatRequestDto.getGroupChatRoomId();
             Long memberId = groupChatRequestDto.getMemberId();
 
@@ -62,7 +68,7 @@ public class RedisServiceImpl implements RedisService{
 
             double compositeScore = count * 1_000_000_000L + roomId;
 
-            redisTemplate.opsForZSet().add("groupChatRoom:memberCounts", roomId.toString(), compositeScore);
+            redisTemplate.opsForZSet().add("groupChatRoom:memberCounts", roomId + "::" + groupChatRequestDto.getGroupChatRoomTopic(), compositeScore);
 
             GroupChatResponseDto responseDto = GroupChatResponseDto.builder()
                     .memberId(memberId)
@@ -81,31 +87,50 @@ public class RedisServiceImpl implements RedisService{
 
     @Override
     public Map<Long, Integer> getGroupChatRoomIdsOrderByMemberCountDesc(GroupChatRequestDto groupChatRequestDto) {
+        Set<ZSetOperations.TypedTuple<String>> fullSet = redisTemplate.opsForZSet()
+                .reverseRangeWithScores("groupChatRoom:memberCounts", 0, -1);
 
-        groupChatRequestDto.setOffset(groupChatRequestDto.getOffset());
+        List<Map.Entry<Long, Integer>> filtered = fullSet.stream()
+                .map(t -> {
+                    String[] parts = t.getValue().split("::", 2);
+                    Long roomId = Long.parseLong(parts[0]);
+                    String topic = parts.length > 1 ? parts[1] : "";
+                    int memberCount = (int)(t.getScore() / 1_000_000_000L);
+                    return new AbstractMap.SimpleEntry<>(roomId, new AbstractMap.SimpleEntry<>(topic, memberCount));
+                })
+                .filter(entry -> {
+                    String target = groupChatRequestDto.getGroupChatRoomTopic();
+                    return target == null || target.equals("전체") || target.equals(entry.getValue().getKey());
+                })
+                .map(entry -> Map.entry(entry.getKey(), entry.getValue().getValue()))
+                .toList();
 
-        Set<ZSetOperations.TypedTuple<String>> resultSet = redisTemplate.opsForZSet()
-                        .reverseRangeWithScores("groupChatRoom:memberCounts", groupChatRequestDto.getOffset(),groupChatRequestDto.getOffset() + (groupChatRequestDto.getSize() - 1));
+        Stream<Map.Entry<Long, Integer>> stream = filtered.stream();
 
-        return resultSet.stream()
-                .collect(Collectors.toMap(
-                        t -> Long.parseLong(t.getValue()),
-                        t -> (int)(t.getScore() / 1_000_000_000L),
-                        (a, b) -> a,
-                        LinkedHashMap::new
-                ));
+        if (Objects.equals(groupChatRequestDto.getSearchText(), "")) {
+            stream = stream
+                    .skip(groupChatRequestDto.getOffset())
+                    .limit(groupChatRequestDto.getSize());
+        } else {
+            stream = stream.skip(groupChatRequestDto.getOffset());
+        }
+
+        return stream.collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (a, b) -> b,
+                LinkedHashMap::new
+        ));
+
     }
 
     @Override
     public Long getGroupChatRoomMemberCount(GroupChatRequestDto groupChatRequestDto) {
         try {
-            Double score = redisTemplate.opsForZSet().score("groupChatRoom:memberCounts", groupChatRequestDto.getGroupChatRoomId().toString());
+            String memberValue = groupChatRequestDto.getGroupChatRoomId() + "::" + groupChatRequestDto.getGroupChatRoomTopic();
+            Double score = redisTemplate.opsForZSet().score("groupChatRoom:memberCounts", memberValue);
 
-            if (score != null) {
-                return (long)(score / 1_000_000_000L);
-            } else {
-                return 0L;
-            }
+            return score != null ? (long)(score / 1_000_000_000L) : 0L;
         } catch (Exception e){
             e.printStackTrace();
             return null;
